@@ -2,7 +2,8 @@
 import selectors
 import socket
 import struct
-
+from Request import Request
+from Payload import Payload
 from RequestManager import RequestManager
 from SQLInitiator import SQLInitiator
 
@@ -15,6 +16,38 @@ def accept(sock, mask):
      conn.setblocking(False)
      sel.register(conn, selectors.EVENT_READ, parse_request)
 
+
+def build_request(data):
+    client_id = struct.unpack("<16s", data[:16])[0].decode("utf-8");
+    req_code = struct.unpack("<4s", data[17:21])[0].decode("utf-8");
+    version = struct.unpack("<c", data[22:23])[0].decode("utf-8");
+    message_type = struct.unpack("<c", data[24:25])[0].decode("utf-8");
+    ## todo: should be 4 bits long
+    payload_size = struct.unpack("<I", data[24:28])[0];
+    if payload_size == '0':
+        payload = ""
+    else:
+        ## todo: try catch for the other params as well.!!!
+        try:
+            # todo: parse payload and pass as a string on the client side.
+            # WE CURRENTLY USE PERMENANT SIZE INSTEAD OF THE GIVEN... 256+ 161 = 417
+            permanent_payload_size = 417
+            payload_data = struct.unpack("<%ds" % permanent_payload_size, data[28:(28+permanent_payload_size)])[0];
+            payload = build_payload(payload_data);
+        except:
+            print("Failed to parse payload.");
+            payload = "";
+    params = Request(client_id, version, req_code, payload_size, message_type, payload);
+    return params;
+
+# buffer payload:
+# b'\x00\x08\x00\x00\x00bl\x00\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe'
+def build_payload(data):
+    payload_size = struct.unpack("<I", data[0:4])#data[28:32])[0];
+    payload_content =struct.unpack("<s256", data[5:261]) # 256
+    public_key = struct.unpack("<s161", data[261:422])# 161
+
+    return Payload(payload_size, payload_content, public_key);
 
 def fetch_request_params(conn):
 
@@ -30,27 +63,12 @@ def fetch_request_params(conn):
     # params = str(content).split(" ")
     # return params;
 
-    length = 128; # in bytes;
+    length = 445; # in bytes;
     data = conn.recv(length);
     print("data:")
     print(data);
-    client_id = struct.unpack("<16s",data[:16])[0].decode("utf-8");
-    req_code = struct.unpack("<4s",data[17:21])[0].decode("utf-8");
-    version = struct.unpack("<c", data[22:23])[0].decode("utf-8");
-    ## todo: should be 4 bits long
-    payload_size = struct.unpack("<I",data[23:27])[0];
-    if payload_size == '0':
-        payload = ""
-    else:
-        ## todo: try catch for the other params as well.!!!
-        try:
-            # todo: parse payload and pass as a string on the client side.
-            payload = struct.unpack("<%ds"%payload_size,data[27:(27+payload_size)])[0].decode("utf-8");
-        except:
-            print("Failed to parse payload.");
-            payload="";
 
-    params = {client_id ,version , req_code , payload_size , payload};
+    params = build_request(data);
     print("successfully fetched params:",params)
     return params;
 
