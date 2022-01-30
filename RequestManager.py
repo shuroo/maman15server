@@ -38,7 +38,8 @@ class RequestManager:
 
     def handle_request(self, conn, *args):
         # todo: use the params, wrap them into a class.
-        request_code = args[0][2];#.strip("'");
+        request = args[0];
+        request_code = request.getRequestCode();#.strip("'");
         # if(isinstance(request_code, list)):
         #     request_code = args[0].strip("'") ;
         print("in handle request!! request_code:",request_code)

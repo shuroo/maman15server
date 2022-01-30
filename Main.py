@@ -21,7 +21,7 @@ def build_request(data):
     client_id = struct.unpack("<16s", data[:16])[0].decode("utf-8");
     req_code = struct.unpack("<4s", data[17:21])[0].decode("utf-8");
     version = struct.unpack("<c", data[22:23])[0].decode("utf-8");
-    message_type = struct.unpack("<c", data[24:25])[0].decode("utf-8");
+    message_type = struct.unpack("<c", data[23:24])[0].decode("utf-8");
     ## todo: should be 4 bits long
     payload_size = struct.unpack("<I", data[24:28])[0];
     if payload_size == '0':
@@ -31,8 +31,7 @@ def build_request(data):
         try:
             # todo: parse payload and pass as a string on the client side.
             # WE CURRENTLY USE PERMENANT SIZE INSTEAD OF THE GIVEN... 256+ 161 = 417
-            permanent_payload_size = 417
-            payload_data = struct.unpack("<%ds" % permanent_payload_size, data[28:(28+permanent_payload_size)])[0];
+            payload_data = struct.unpack("<%ds" % payload_size, data[28:(28+payload_size)])[0];
             payload = build_payload(payload_data);
         except:
             print("Failed to parse payload.");
@@ -44,10 +43,10 @@ def build_request(data):
 # b'\x00\x08\x00\x00\x00bl\x00\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe'
 def build_payload(data):
     payload_size = struct.unpack("<I", data[0:4])#data[28:32])[0];
-    payload_content =struct.unpack("<s256", data[5:261]) # 256
-    public_key = struct.unpack("<s161", data[261:422])# 161
+    name_or_message = struct.unpack("<257s", data[4:261])[0].decode("utf-8") # 256
+    public_key = struct.unpack("<%ds"%(len(data[261:])), data[261:])[0]# 161
 
-    return Payload(payload_size, payload_content, public_key);
+    return Payload(payload_size, name_or_message, public_key);
 
 def fetch_request_params(conn):
 
@@ -62,8 +61,8 @@ def fetch_request_params(conn):
     # content = gvrTxt[:nullTerminatorIndex]
     # params = str(content).split(" ")
     # return params;
-
-    length = 445; # in bytes;
+    # ToDo: Place in constant.
+    length = 1024; # in bytes;
     data = conn.recv(length);
     print("data:")
     print(data);

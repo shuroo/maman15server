@@ -15,7 +15,7 @@ class Request:
     def getVersion(self):
         return self._version;
 
-    def getPayloadCode(self):
+    def getRequestCode(self):
         return self._req_code;
 
     def getPayloadSize(self):
