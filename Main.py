@@ -45,7 +45,6 @@ def build_payload(data):
     payload_size = struct.unpack("<I", data[0:4])#data[28:32])[0];
     name_or_message = struct.unpack("<257s", data[4:261])[0].decode("utf-8") # 256
     public_key = struct.unpack("<%ds"%(len(data[261:])), data[261:])[0]# 161
-
     return Payload(payload_size, name_or_message, public_key);
 
 def fetch_request_params(conn):
@@ -67,9 +66,9 @@ def fetch_request_params(conn):
     print("data:")
     print(data);
 
-    params = build_request(data);
-    print("successfully fetched params:",params)
-    return params;
+    request = build_request(data);
+    print("successfully fetched request:",request)
+    return request;
 
 
 def parse_request(conn, mask):
@@ -78,7 +77,6 @@ def parse_request(conn, mask):
      sql_conn = sql.setSQLEnv();
      req_man = RequestManager();
      resp = req_man.handle_request(sql_conn, params);
-
      reply = str(resp).encode()
      replydata = bytearray(reply)
      print("Replying with data:", reply)

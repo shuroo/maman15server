@@ -1,14 +1,21 @@
 from UUIDProvider import UUIDProvider
 from SQLOperations import SQLOperations
-
+from Response import Response
+from Constants import Constants
+import struct;
 
 class RequestManager:
 
-    def handle_create_client_request(self,conn, *args):
+    def handle_create_client_request(self,conn, request):
         print("reached handle_create_client_request!!!!")
-        pubKey = UUIDProvider.createPublicKeyHex();
-        SQLOperations.add_client(pubKey, conn, args);
-        return pubKey;
+        ident = UUIDProvider.createPublicKeyHex();
+        SQLOperations.add_client(ident, conn, request);
+        response = Response("","", ident, Constants.version, "2100" ,
+                 0 , 0, "")
+        resp_size = struct.calcsize(struct.pack(response))
+        response = struct.pack(Response("","", ident, Constants.version, "2100" ,
+                 resp_size, 0, ""))
+        return response;
 
     # For Request 120:
     def handle_clients_list_request(self,conn, *args):
