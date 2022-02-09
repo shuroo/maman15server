@@ -9,7 +9,7 @@ class Request:
         self._message_type = message_type;
         self._payload_content = payload_content;
 
-    def getClientID(self):
+    def getClientName(self):
         return self._client_id;
 
     def getVersion(self):

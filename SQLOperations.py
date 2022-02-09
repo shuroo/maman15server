@@ -7,14 +7,14 @@ class SQLOperations:
         For request 110: add a new client (if not exists)
     '''
     @staticmethod
-    def add_client(uuid,conn,args):
+    def add_client(user_name,uuid,conn,request):
 
         cursor = conn.cursor();
         # Refresh cursor to sych mysql:
         cursor.close()
         cursor = conn.cursor()
-        client_id = args[0][0]
-        params = (client_id,client_id,uuid)
+        client_id = request.getClientName();
+        params = (client_id,user_name,uuid)
         cursor.execute(""" INSERT INTO 
                               Clients  
                              (clientId,userName,publicKey,LastSeen) 
