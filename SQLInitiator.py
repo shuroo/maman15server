@@ -28,6 +28,11 @@ class SQLInitiator:
         self.cnx.commit();
         return self.cnx;
 
+    def resetDB(self):
+
+        self.executeScriptsFromFile('db_scripts/clearDB.db');
+        self.cnx.commit();
+        return self.cnx;
 
 if __name__ == '__main__':
 

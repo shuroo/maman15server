@@ -1,13 +1,13 @@
 drop database IF EXISTS maman_db;
 CREATE DATABASE IF NOT EXISTS maman_db;
 USE maman_db;
-CREATE TABLE IF NOT EXISTS Clients (clientID varchar(16) primary key not null,
-            UserName varchar(255),
-            PublicKey varchar(160),
+CREATE TABLE IF NOT EXISTS Clients (clientID BINARY( 16 ) primary key not null,
+            UserName varchar(256),
+            PublicKey BLOB,
             LastSeen DATETIME
             );
-CREATE TABLE IF NOT EXISTS Messages ( ToClient varchar(16),
-            FromClient varchar(16),
+CREATE TABLE IF NOT EXISTS Messages ( ToClient BINARY( 16 ) ,
+            FromClient BINARY( 16 ) ,
             Type varchar(1),
             Content Blob,
             FOREIGN KEY (ToClient) REFERENCES Clients(clientID),

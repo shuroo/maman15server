@@ -1,14 +1,19 @@
 class Payload:
 
-    def __init__(self, client_id="", content=dict()):
+    def __init__(self,client_id,content=""):
         self._client_id = client_id;
         self._content = content;
         self._payload_size = self.calcPayloadSize();
 
     def calcPayloadSize(self):
-        sze = len(self._client_id);
-        for key in self._content:
-            sze += len(self._content[key]);
+        try:
+            sze = len(str(self._client_id));
+            sze += len(self._content);
+            # for key in self._content:
+            #     sze += len(self._content[key]);
+        except Exception as e:
+            print("Failed to parse size. error:",e);
+            sze=0;
         return sze;
 
     def getPayloadSize(self):

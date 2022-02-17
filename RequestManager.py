@@ -1,13 +1,14 @@
 from UUIDProvider import UUIDProvider
 from SQLOperations import SQLOperations
 from Response import Response
-from Payload import Payload
+from PayloadResponse import PayloadResponse
 
 class RequestManager:
 
     def handle_general_errors(self):
-        print("9000 Error Raised and Sent!!")
-        response = Response("9000")
+        msg = "9000 Error Raised and Sent!!"
+        print(msg)
+        response = Response("9000",PayloadResponse("",msg))
         reply = response.pack_response()
         return reply;
 
@@ -15,7 +16,7 @@ class RequestManager:
         print("reached handle_create_client_request!!!!")
         ident = UUIDProvider.createUniqueID();
         SQLOperations.add_client(request.getClientName(), ident, conn, request);
-        response = Response("2100", Payload(ident))
+        response = Response("2100", PayloadResponse(ident))
         reply = response.pack_response()
         return reply;
 
@@ -83,6 +84,6 @@ class RequestManager:
             #     pubKey = self.handle_create_client_request(conn,*args);
             #     return pubKey;
         except Exception as err:
-            print('Failed to handle request. error raised:\n', err);
+            print('Failed to handle request. Error raised:', err);
             return self.handle_general_errors()
         return 0

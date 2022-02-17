@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 class Request:
 
-    def __init__(self,client_id,version , req_code , payload_size , message_type, payload_content):
+    def __init__(self,client_id,version , req_code , payload_size , message_type, payloadObj):
         self._client_id = client_id;
         self._version = version;
         self._req_code = req_code;
         self._payload_size = payload_size;
         self._message_type = message_type;
-        self._payload_content = payload_content;
+        self._payload = payloadObj;
 
     def getClientName(self):
         return self._client_id;
@@ -24,8 +24,8 @@ class Request:
     def getMessageType(self):
         return self._message_type;
 
-    def getPayloadContent(self):
-        return self._payload_content;
+    def getPayloadObject(self):
+        return self._payload;
 
 import sys
 import ctypes

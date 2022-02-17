@@ -18,7 +18,7 @@ def accept(sock, mask):
 
 
 def build_request(data):
-    client_id = struct.unpack("<16s", data[:16])[0].decode("utf-8");
+    client_name = struct.unpack("<16s", data[:16])[0].decode("utf-8");
     req_code = struct.unpack("<4s", data[17:21])[0].decode("utf-8");
     version = struct.unpack("<c", data[22:23])[0].decode("utf-8");
     message_type = struct.unpack("<c", data[23:24])[0].decode("utf-8");
@@ -33,19 +33,19 @@ def build_request(data):
             # WE CURRENTLY USE PERMENANT SIZE INSTEAD OF THE GIVEN... 256+ 161 = 417
             payload_data = struct.unpack("<%ds" % payload_size, data[28:(28+payload_size)])[0];
             payload = build_payload(payload_data);
-        except:
-            print("Failed to parse payload.");
+        except Exception as e:
+            print("Failed to parse payload, error:",e);
             payload = "";
-    params = Request(client_id, version, req_code, payload_size, message_type, payload);
+    params = Request(client_name, version, req_code, payload_size, message_type, payload);
     return params;
 
 # buffer payload:
 # b'\x00\x08\x00\x00\x00bl\x00\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe'
 def build_payload(data):
-    payload_size = struct.unpack("<I", data[0:4])#data[28:32])[0];
+    payload_size = struct.unpack("<I", data[0:4])
     name_or_message = struct.unpack("<257s", data[4:261])[0].decode("utf-8") # 256
-    public_key = struct.unpack("<%ds"%(len(data[261:])), data[261:])[0]# 161
-    return Payload(payload_size, name_or_message, public_key);
+    public_key = struct.unpack("<%ds"%161, data[261:422])[0]  # ("<%ds"%(len(data[261:])), data[261:])[0]# 161
+    return Payload(name_or_message, public_key);
 
 def fetch_request_params(conn):
 
@@ -74,7 +74,7 @@ def fetch_request_params(conn):
 def parse_request(conn, mask):
      params = fetch_request_params(conn)
      sql = SQLInitiator();
-     sql_conn = sql.setSQLEnv();
+     sql_conn = sql.cnx;
      req_man = RequestManager();
      resp = req_man.handle_request(sql_conn, params);
      reply = str(resp).encode()
@@ -124,20 +124,22 @@ if __name__ == '__main__':
     PORT = f.read()        # Port to listen on (non-privileged ports are > 1023)
 
     try:
-      PORT = int(PORT)
-    except:
-      print("Failed to convert port to an integer, of value:",PORT)
+        # Reset DB:
+        sql = SQLInitiator();
+        conn = sql.setSQLEnv();
+        PORT = int(PORT)
+        # Connect via socket.
+        sock = socket.socket()
+        sock.bind((HOST, PORT))
+        sock.listen(100)
+        sock.setblocking(False)
+        sel.register(sock, selectors.EVENT_READ, accept)
 
-    # Connect via socket.
-    sock = socket.socket()
-    sock.bind((HOST, PORT))
-    sock.listen(100)
-    sock.setblocking(False)
-    sel.register(sock, selectors.EVENT_READ, accept)
-
-    while True:
-     events = sel.select()
-     for key, mask in events:
-        callback = key.data
-        print(key.data)
-        callback(key.fileobj, mask)
+        while True:
+         events = sel.select()
+         for key, mask in events:
+            callback = key.data
+            print(key.data)
+            callback(key.fileobj, mask)
+    except Exception as e:
+      print("Error connecting to socket. aborting. error:", e)

@@ -7,19 +7,21 @@ class SQLOperations:
         For request 110: add a new client (if not exists)
     '''
     @staticmethod
-    def add_client(user_name,uuid,conn,request):
+    def add_client(user_name,uid,conn,request):
 
         cursor = conn.cursor();
         # Refresh cursor to sych mysql:
         cursor.close()
         cursor = conn.cursor()
-        client_id = request.getClientName();
-        params = (client_id,user_name,uuid)
+        public_key = request.getPayloadObject().getContent();
+        print('uid:',uid)
+        params = (str(uid),user_name,public_key) # hex(replace(%s,'-',''))uuid)
         cursor.execute(""" INSERT INTO 
                               Clients  
                              (clientId,userName,publicKey,LastSeen) 
                           VALUES 
-                               (%s, %s, %s, NOW()) """, params);
+                             (unhex(replace(%s,'-','')),%s, %s, NOW())""", params);
+        #  (unhex(replace('%s','-','')),'%s', '%s', NOW());
         conn.commit();
         conn.close;
 
@@ -74,7 +76,7 @@ class SQLOperations:
         cursor = conn.cursor()
         from_client = args[0][0]
         to_client = args[0][1]
-        # TODO: What is this?
+        # TODO: What is this?z
         c_type = 'v'
         content = args[0][2]
         params = (to_client, from_client, c_type, content)
