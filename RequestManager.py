@@ -14,40 +14,39 @@ class RequestManager:
 
     def handle_create_client_request(self,conn, request):
         print("reached handle_create_client_request!!!!")
-        ident = UUIDProvider.createUniqueID();
-        SQLOperations.add_client(request.getClientName(), ident, conn, request);
+        ident = UUIDProvider.createUniqueID()
+        SQLOperations.add_client(request.getClientName(), ident, conn, request)
         response = Response("2100", PayloadResponse(ident))
         reply = response.pack_response()
         return reply;
-
-    # bytes.fromhex(response.getClientID())
-    # resp_size = struct.calcsize(struct.pack(response))
-    # response = struct.pack(Response("","", ident, Constants.version, "2100" ,
-    #          resp_size, 0, ""))
 
     # For Request 120:
     def handle_clients_list_request(self,conn, *args):
         print("reached handle_clients_list_request!!!!")
         clients_list = SQLOperations.get_clients_list(conn);
-        return clients_list;
+        response = Response("2101", PayloadResponse("",clients_list))
+        reply = response.pack_response()
+        return reply;
 
     # For Request 130:
-    def handle_public_key_request(self,conn, *args):
+    def handle_public_key_request(self,conn, request130):
         print("reached handle_public_key_request!!!!")
-        pub_key = SQLOperations.select_public_key(conn,args);
-        return pub_key;
-
-    # For Request 140:
-    def handle_get_client_messages_request(self,conn, *args):
-        print("reached handle_get_client_messages_request!!!!")
-        messages = SQLOperations.select_client_messages(conn,args);
-        return messages;
-
-    # For Request 150:
-    def handle_create_message_request(self,conn, *args):
-        print("reached handle_create_message_request!!!!")
-        messages = SQLOperations.create_client_message(conn,args);
-        return messages;
+        pub_key = SQLOperations.select_public_key(conn,request130.getClientId());
+        response = Response("2102", PayloadResponse("",pub_key))
+        reply = response.pack_response()
+        return reply;
+    #
+    # # For Request 140:
+    # def handle_get_client_messages_request(self,conn, *args):
+    #     print("reached handle_get_client_messages_request!!!!")
+    #     messages = SQLOperations.select_client_messages(conn,args);
+    #     return messages;
+    #
+    # # For Request 150:
+    # def handle_create_message_request(self,conn, *args):
+    #     print("reached handle_create_message_request!!!!")
+    #     messages = SQLOperations.create_client_message(conn,args);
+    #     return messages;
 
     # TBD: Requests: 150,151,152,153,0
 

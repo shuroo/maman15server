@@ -41,6 +41,7 @@ class SQLOperations:
     '''
     def select_public_key(conn,args):
         cursor = conn.cursor()
+        # todo 20/2: Need to read the public key from params!!!
         client_id = args[0][0]
         str_client = client_id.decode("utf-8")
         query = (""" select PublicKey from clients where clientID = '%s'; """%str_client);

@@ -4,11 +4,6 @@ from Constants import Constants
 from Utils import Utils
 
 import struct
-from Payload import Payload;
-
-
-# def clientIdTo16Filler(self):
-#     return Utils.strFiller(self._client_id,16);
 
 
 class Response:
@@ -27,12 +22,12 @@ class Response:
         if self._response_code == '2100':
             uid_packed = self._payload.getClientId().bytes;
             print('clientId before Packing:', self._payload.getClientId())
-            # max_int64 = 0xFFFFFFFFFFFFFFFF
-            # uid_packed = struct.pack('>QQ', (uid.int >> 64) & max_int64, uid.int & max_int64)
-
-            return struct.pack('<4s16sB', Utils.strToBytes(self._response_code),
-                             uid_packed,
-                    self._version);
+            return struct.pack('<4sB16s', Utils.strToBytes(self._response_code),self._version,
+                             uid_packed);
+        if self._response_code == '2101' | self._response_code == '2102':
+            pl_size = self._payload.getPayloadSize()
+            return struct.pack('<4sB%ds"'% pl_size, Utils.strToBytes(self._response_code),self._version,
+                             Utils.strToBytes(self._payload.getContent()));
         elif self._response_code == '9000':
             return struct.pack('<4sB', Utils.strToBytes(self._response_code) ,
                     self._version);
