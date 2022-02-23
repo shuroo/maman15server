@@ -22,7 +22,6 @@ class RequestManager:
 
     # For Request 120:
     def handle_clients_list_request(self,conn, *args):
-        print("reached handle_clients_list_request!!!!")
         clients_list = SQLOperations.get_clients_list(conn);
         response = Response("2101", PayloadResponse("",clients_list))
         reply = response.pack_response()
@@ -60,8 +59,8 @@ class RequestManager:
                 return pubKey;
             # 120 - clients list: - reply should be __ when ok or 9000 - otherwise
             if request_code == "1101":
-                pubKey = self.handle_clients_list_request(conn,*args);
-                return pubKey;
+                clients_list = self.handle_clients_list_request(conn,*args);
+                return clients_list;
             # 130 - clients list: - reply should be __ when ok or 9000 - otherwise
             if request_code == "1102":
                 pubKey = self.handle_public_key_request(conn,*args);

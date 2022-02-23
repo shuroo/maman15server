@@ -24,7 +24,7 @@ def build_request(data):
     message_type = struct.unpack("<c", data[23:24])[0].decode("utf-8");
     ## todo: should be 4 bits long
     payload_size = struct.unpack("<I", data[24:28])[0];
-    if payload_size == '0':
+    if payload_size == 0:
         payload = ""
     else:
         ## todo: try catch for the other params as well.!!!

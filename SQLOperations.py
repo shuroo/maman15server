@@ -16,6 +16,7 @@ class SQLOperations:
         public_key = request.getPayloadObject().getContent();
         print('uid:',uid)
         params = (str(uid),user_name,public_key) # hex(replace(%s,'-',''))uuid)
+        print("username request 110:",user_name)
         cursor.execute(""" INSERT INTO 
                               Clients  
                              (clientId,userName,publicKey,LastSeen) 
@@ -31,8 +32,11 @@ class SQLOperations:
     @staticmethod
     def get_clients_list(conn):
         cursor = conn.cursor()
-        cursor.execute("""select * from Clients limit 1000; """)
+        print("in get clients list!")
+        cursor.execute("""select clientId , userName , publicKey 
+        from Clients limit 1000 """)
         result = cursor.fetchall();
+        print(result);
         conn.close;
         return result;
 
