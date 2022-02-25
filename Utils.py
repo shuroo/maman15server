@@ -6,7 +6,7 @@ class Utils:
         fill = ' '
         align = '<'
         width = sze
-        f'{message:{fill}{align}{width}}'
+        return f'{message:{fill}{align}{width}}'
 
     @staticmethod
     def strToBytes(content):

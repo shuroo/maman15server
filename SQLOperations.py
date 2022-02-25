@@ -33,7 +33,7 @@ class SQLOperations:
     def get_clients_list(conn):
         cursor = conn.cursor()
         print("in get clients list!")
-        cursor.execute("""select clientId , userName , publicKey 
+        cursor.execute("""select clientId, userName 
         from Clients limit 1000 """)
         result = cursor.fetchall();
         print(result);

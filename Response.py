@@ -37,11 +37,11 @@ class Response:
             clients_list =self._payload.getContent()
             data = b''
             for row in clients_list:
-                clientId , userName, publicKey = row[0] ,row[1], row[2]
-                print(clientId , "," , userName , "," , publicKey)
-                data += struct.pack('<16s', clientId)
+                clientId = row[0]
+                userName = Utils.strFiller(row[1],256)
+                print("uid:::",clientId , ",userName::" , userName )
                 data += struct.pack('<256s', Utils.strToBytes(str(userName)))
-                data += struct.pack('<161s', publicKey) # "userName"
+                data += struct.pack('<16s', clientId)
             data = struct.pack('<4sIB', Utils.strToBytes(self._response_code), pl_size, self._version) + data;
             return data;
 
