@@ -1,6 +1,7 @@
 from UUIDProvider import UUIDProvider
 from SQLOperations import SQLOperations
 from Response import Response
+from Response2101 import Response2101
 from PayloadResponse import PayloadResponse
 
 class RequestManager:
@@ -23,7 +24,7 @@ class RequestManager:
     # For Request 120:
     def handle_clients_list_request(self,conn, *args):
         clients_list = SQLOperations.get_clients_list(conn);
-        response = Response("2101", PayloadResponse("",clients_list))
+        response = Response2101(clients_list)
         reply = response.pack_response()
         return reply;
 
