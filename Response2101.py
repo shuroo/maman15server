@@ -8,7 +8,7 @@ class Response2101(Response):
 
 
     def calcRespSize(self):
-        sze = len(self._clients_list) *(16+256);
+        sze = len(self._clients_list) *(Constants.sizeOfUid+Constants.sizeOfName);
         return sze;
 
     def __init__(self, clients_list):
@@ -21,29 +21,27 @@ class Response2101(Response):
         data = bytearray();
         for row in self._clients_list:
             clientId = row[0]
-            userName = Utils.strFiller(row[1],256)
+            userName = Utils.strFillerWithSpaces(row[1], Constants.sizeOfName)
             print("uid:::",clientId , ",userName::" , userName )
-            data += struct.pack('<256s', Utils.strToBytes(str(userName)))
-            data += struct.pack('<16s', clientId)
+            data += struct.pack('<%ds' % Constants.sizeOfName, Utils.strToBytes(str(userName)))
+            data += struct.pack('<%ds' % Constants.sizeOfUid, clientId)
+        return data;
 
     # for 2101:
     def pack_response(self):
-        print("Inside Child1")
         data = b''
-        headerStruct = struct.Struct(f'< 4s 1s 4s')
+        headerStruct =  struct.Struct(f'< 4s 1s 4s')
+
+            #struct.Struct(f'< 4s 1s 4s')
         #             headerStruct = struct.Struct(f'< H B I')
         #             data = headerStruct.pack(self._response_code, self._version, self._payload_size)
         #             return data;
-        data = headerStruct.pack(Utils.uncodeIntAsString(self._response_code), Utils.uncodeIntAsString(self._version),
-                                 Utils.uncodeIntAsString(self._payload_size))
+        data = headerStruct.pack(Utils.uncodeIntAsString(self._response_code),  Utils.strFillerWithTrailingZeros(self._version,2), # Utils.uncodeIntAsString(
+                                 Utils.strFillerWithTrailingZeros(self._payload_size,4))
+
+        print("self._payload_size::",self._payload_size)
         if (self._payload_size == 0):
             # data = headerStruct.pack(self._response_code, self._version, self._payload_size)
             return data;
-        for client in self._clients_list:
-            clientId =  client[0];
-            userName = bytes(Utils.strFiller(client[1],256),'ascii')# todo: put in utils #Utils.strFiller(row[1], 256)
-            print("usename len:",len(userName))
-            print("uid:::", clientId, ",userName::", userName)
-            data += struct.pack('<256s', userName)
-            data += struct.pack('<16s', clientId)
+        data += self.pack_clients_list();
         return data;
