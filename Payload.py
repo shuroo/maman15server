@@ -1,7 +1,7 @@
 class Payload:
 
-    def __init__(self,client_id,content=""):
-        self._client_id = client_id;
+    def __init__(self, header_param, content=""):
+        self._header_param = header_param;
         self._content = content;
         self._payload_size = self.calcPayloadSize();
 
@@ -22,5 +22,6 @@ class Payload:
     def getContent(self):
         return self._content;
 
-    def getClientId(self):
-        return self._client_id;
+    # General header param: name , message or client id.
+    def getHeaderParam(self):
+        return self._header_param;

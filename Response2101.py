@@ -36,7 +36,8 @@ class Response2101(Response):
         #             headerStruct = struct.Struct(f'< H B I')
         #             data = headerStruct.pack(self._response_code, self._version, self._payload_size)
         #             return data;
-        data = headerStruct.pack(Utils.uncodeIntAsString(self._response_code),  Utils.strFillerWithTrailingZeros(self._version,2), # Utils.uncodeIntAsString(
+        data = headerStruct.pack(Utils.uncodeIntAsString(self._response_code),
+                                 Utils.strFillerWithTrailingZeros(self._version,2), # Utils.uncodeIntAsString(
                                  Utils.strFillerWithTrailingZeros(self._payload_size,4))
 
         print("self._payload_size::",self._payload_size)

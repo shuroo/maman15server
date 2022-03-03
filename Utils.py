@@ -19,8 +19,8 @@ class Utils:
     @staticmethod
     def strFillerWithTrailingZeros(content, sze):
         number_str = str(content)
-        zero_filled_number = number_str.zfill((sze - len(number_str)))
-        return Utils.strToBytes(zero_filled_number)
+        zero_filled_number = number_str.rjust(sze, '0')
+        return Utils.strToBytes(zero_filled_number);
 
     @staticmethod
     def addNullTerminator(content):
@@ -29,7 +29,6 @@ class Utils:
     @staticmethod
     def strToBytes(content):
        return bytes(content, 'UTF-8');
-
     @staticmethod
     def uncodeIntAsString(integer):
         str_int = Utils.strToBytes(Utils.addNullTerminator(str(integer)))

@@ -21,8 +21,8 @@ class Response:
 
     def pack_response(self):
         if self._response_code == '2100':
-            uid_packed = self._payload.getClientId().bytes;
-            print('clientId before Packing:', self._payload.getClientId())
+            uid_packed = self._payload.getHeaderParam().bytes;
+            print('clientId before Packing:', self._payload.getHeaderParam())
             return struct.pack('<4sB16s', Utils.strToBytes(self._response_code),self._version,
                              uid_packed);
         if self._response_code == '2102':

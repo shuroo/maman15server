@@ -29,9 +29,8 @@ class RequestManager:
         return reply;
 
     # For Request 130:
-    def handle_public_key_request(self,conn, request130):
-        print("reached handle_public_key_request!!!!")
-        pub_key = SQLOperations.select_public_key(conn,request130.getClientId());
+    def handle_public_key_request(self,conn, req):
+        pub_key = SQLOperations.select_public_key(conn,req.getPayloadObject());
         response = Response("2102", PayloadResponse("",pub_key))
         reply = response.pack_response()
         return reply;

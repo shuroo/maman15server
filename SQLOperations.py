@@ -32,11 +32,9 @@ class SQLOperations:
     @staticmethod
     def get_clients_list(conn):
         cursor = conn.cursor()
-        print("in get clients list!")
-        cursor.execute("""select clientId, userName 
+        cursor.execute("""select LPAD(clientId, 16, '\0') clientId, userName 
         from Clients limit 1000 """)
         result = cursor.fetchall();
-        print(result);
         conn.close;
         return result;
 
@@ -48,7 +46,7 @@ class SQLOperations:
         # todo 20/2: Need to read the public key from params!!!
         client_id = args[0][0]
         str_client = client_id.decode("utf-8")
-        query = (""" select PublicKey from clients where clientID = '%s'; """%str_client);
+        query = (""" select PublicKey from clients where clientID like 's%%'; """%str_client);
         cursor.execute(query)
         result = cursor.fetchall();
         conn.close;
