@@ -1,3 +1,4 @@
+from UUIDProvider import UUIDProvider;
 
 class SQLOperations:
 
@@ -32,22 +33,26 @@ class SQLOperations:
     @staticmethod
     def get_clients_list(conn):
         cursor = conn.cursor()
-        cursor.execute("""select LPAD(clientId, 16, '\0') clientId, userName 
-        from Clients limit 1000 """)
+        cursor.execute("""select hex(clientId) clientId, userName 
+        from Clients limit 1000 """); # LPAD(, 16, '\0') , CAST(clientId as CHAR(16))
+        # select hex(clientId),publicKey from clients  where hex(clientId) = 'AC30F66482304F4C8ECB290C85E2BFE9';
         result = cursor.fetchall();
+        print('client ids fetched:::',result)
         conn.close;
         return result;
 
     '''
         For request 130: get public key by client 
     '''
-    def select_public_key(conn,args):
+    def select_public_key(conn,pub_key):
         cursor = conn.cursor()
         # todo 20/2: Need to read the public key from params!!!
-        client_id = args[0][0]
-        str_client = client_id.decode("utf-8")
-        query = (""" select PublicKey from clients where clientID like 's%%'; """%str_client);
-        cursor.execute(query)
+        print("pub_key before select 2101:",pub_key);
+        pub_key_str = '%'+pub_key[:pub_key.index('\0')-1]+'%';
+        #pub_key_uuid = UUIDProvider.bytesToUUID(pub_key).hex;
+        query = """select PublicKey,clientId from clients  where hex(clientID) like %s"""#""" select PublicKey,clientId from clients  where clientID = %s; """;
+        tpl_params = (pub_key_str,)
+        cursor.execute(query,tpl_params)
         result = cursor.fetchall();
         conn.close;
         return result;

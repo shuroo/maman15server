@@ -33,7 +33,7 @@ def build_request(data):
             # todo: parse payload and pass as a string on the client side.
             # WE CURRENTLY USE PERMENANT SIZE INSTEAD OF THE GIVEN... 256+ 161 = 417
             payload_data = struct.unpack("<%ds" % payload_size, data[12:(12+payload_size)])[0];
-            payload = build_payload(payload_data);
+            payload = build_payload(payload_data,req_code);
             header_param = payload.getHeaderParam();
         except Exception as e:
             print("Failed to parse payload, error:",e);
@@ -43,24 +43,21 @@ def build_request(data):
 
 # buffer payload:
 # b'\x00\x08\x00\x00\x00bl\x00\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe'
-def build_payload(data):
-    name_or_message = struct.unpack("<257s", data[0:257])[0].decode("utf-8") # 256
-    public_key = struct.unpack("<%ds"%161, data[257:418])[0]  # ("<%ds"%(len(data[261:])), data[261:])[0]# 161
-    return Payload(name_or_message, public_key);
+def build_payload(data,resp_code):
+    if resp_code == '1102' :
+       # pl_sze = struct.unpack("<I", data[:4])
+        client_id = struct.unpack("<%dp"% len(data[3:49]), data[3:49])[0].decode('utf-8') # [15:62]
+        return Payload(client_id);
+    else:
+        # todo: what about the first 3 bits?
+        name_or_message = struct.unpack("<%ds"% len(data[3:259]), data[3:259])[0].decode("utf-8") # 256
+        public_key = struct.unpack("<%ds"% len(data[259:420]), data[259:420])[0]  # ("<%ds"%(len(data[261:])), data[261:])[0]# 161
+        return Payload(name_or_message, public_key);
 
 def fetch_request_params(conn):
 
     #### Mark this when params are not fetched as string with delimiters:
     #
-    # length = 1024
-    # text = conn.recv(length)  # Should be ready
-    # if text:
-    #     print('echoing', repr(text))
-    # gvrTxt = struct.unpack("%ds" % length, text)[0]
-    # nullTerminatorIndex = gvrTxt.index(b'\x00')
-    # content = gvrTxt[:nullTerminatorIndex]
-    # params = str(content).split(" ")
-    # return params;
     # ToDo: Place in constant.
     length = Constants.max_buffer_size; # in bytes;
     data = conn.recv(length);

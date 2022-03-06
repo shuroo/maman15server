@@ -9,7 +9,7 @@ import struct
 class Response:
 
     # todo: EXPEND PARAMS!!
-    def __init__(self, response_code, payload): # client_id="", , clientName="", messageId=""
+    def __init__(self, response_code, payload):
         self._response_code, self._version, self._payload = response_code, Constants.version, payload;
         self._payload_size = self.calcRespSize();
 
@@ -18,19 +18,32 @@ class Response:
         sze = len(self._response_code) + len(str(self._version))  + self._payload.getPayloadSize();
         return sze;
 
+    def pack_header(self):
+        headerStruct = struct.Struct(f'< 4s 1s 4s')
+        data = headerStruct.pack(Utils.uncodeIntAsString(self._response_code),
+                                 Utils.strFillerWithTrailingZeros(self._version, 2),  # Utils.uncodeIntAsString(
+                                 Utils.strFillerWithTrailingZeros(self._payload_size, 4))
+        return data;
+
+    def packUid(self,uid):
+        uid_bytes = uid.bytes;
+        return struct.pack('<16s',
+                    uid_bytes);
+
+    def packPubKey(self,pubKey):
+        pk_bytes = Utils.strToBytes(pubKey);
+        return struct.pack('<160s',
+                    pk_bytes);
 
     def pack_response(self):
         if self._response_code == '2100':
-            uid_packed = self._payload.getHeaderParam().bytes;
+
             print('clientId before Packing:', self._payload.getHeaderParam())
-            return struct.pack('<4sB16s', Utils.strToBytes(self._response_code),self._version,
-                             uid_packed);
-        if self._response_code == '2102':
-            pl_size = self._payload.getPayloadSize()
-            if( pl_size == 0 ):
-                return struct.pack('<4sIB', Utils.strToBytes(self._response_code), pl_size, self._version);
-            return struct.pack('<4sBI%ds'% pl_size, Utils.strToBytes(self._response_code),pl_size, self._version,
-                             self._payload.getContent());
+            data = self.pack_header();
+            uid_packed = self._payload.getHeaderParam();
+            data += self.packUid(uid_packed);
+            return data;
+
         # todo: add error. should not reach here but to the sub class
         # elif self._response_code == '2101':
         #     pl_size = self._payload.getPayloadSize()

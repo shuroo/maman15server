@@ -7,7 +7,7 @@ class Payload:
 
     def calcPayloadSize(self):
         try:
-            sze = len(str(self._client_id));
+            sze = len(str(self._header_param));
             sze += len(self._content);
             # for key in self._content:
             #     sze += len(self._content[key]);

@@ -3,6 +3,7 @@ from SQLOperations import SQLOperations
 from Response import Response
 from Response2101 import Response2101
 from PayloadResponse import PayloadResponse
+from Response2102 import Response2102
 
 class RequestManager:
 
@@ -14,7 +15,6 @@ class RequestManager:
         return reply;
 
     def handle_create_client_request(self,conn, request):
-        print("reached handle_create_client_request!!!!")
         ident = UUIDProvider.createUniqueID()
         SQLOperations.add_client(request.getClientName(), ident, conn, request)
         response = Response("2100", PayloadResponse(ident))
@@ -24,14 +24,16 @@ class RequestManager:
     # For Request 120:
     def handle_clients_list_request(self,conn, *args):
         clients_list = SQLOperations.get_clients_list(conn);
+        print('clients list resp 120 first item::::',clients_list[0][0],",,",clients_list[0][1])
         response = Response2101(clients_list)
         reply = response.pack_response()
         return reply;
 
     # For Request 130:
     def handle_public_key_request(self,conn, req):
-        pub_key = SQLOperations.select_public_key(conn,req.getPayloadObject());
-        response = Response("2102", PayloadResponse("",pub_key))
+        client_id = req.getPayloadObject().getHeaderParam()
+        pub_key = SQLOperations.select_public_key(conn,client_id);
+        response = Response2102(client_id,pub_key)
         reply = response.pack_response()
         return reply;
     #
