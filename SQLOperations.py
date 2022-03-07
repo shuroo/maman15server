@@ -50,7 +50,7 @@ class SQLOperations:
         print("pub_key before select 2101:",pub_key);
         pub_key_str = '%'+pub_key[:pub_key.index('\0')-1]+'%';
         #pub_key_uuid = UUIDProvider.bytesToUUID(pub_key).hex;
-        query = """select PublicKey,clientId from clients  where hex(clientID) like %s"""#""" select PublicKey,clientId from clients  where clientID = %s; """;
+        query = """select PublicKey,hex(clientId) from clients  where hex(clientID) like %s"""#""" select PublicKey,clientId from clients  where clientID = %s; """;
         tpl_params = (pub_key_str,)
         cursor.execute(query,tpl_params)
         result = cursor.fetchall();

@@ -1,3 +1,4 @@
+from UUIDProvider import UUIDProvider
 
 from Response import Response
 from Utils import Utils
@@ -22,5 +23,7 @@ class Response2102(Response):
             # data = headerStruct.pack(self._response_code, self._version, self._payload_size)
             return data;
         data += self.packPubKey(self._payload[0]);
-        data += self.packUid(self._payload[1]);
+        print('pub key in resp 2102:', self._payload[0])
+        uid_obj = UUIDProvider.strToUUID(self._payload[1][0][1]);
+        data += self.packUid(uid_obj);
         return data;
