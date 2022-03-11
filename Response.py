@@ -15,13 +15,13 @@ class Response:
 
     def calcRespSize(self):
         # self._version.size() = 1
-        sze = len(self._response_code) + len(str(self._version))  + self._payload.getPayloadSize();
+        sze = Constants.size_of_resp_code + Constants.size_of_version + self._payload.getPayloadSize();
         return sze;
 
     def pack_header(self):
-        headerStruct = struct.Struct(f'< 4s 1s 4s')
+        headerStruct = struct.Struct(f'< 4s B 4s' )  # f< H B I) # < 4s 2s 4s
         data = headerStruct.pack(Utils.uncodeIntAsString(self._response_code),
-                                 Utils.strFillerWithTrailingZeros(self._version, 2),  # Utils.uncodeIntAsString(
+                                 self._version,
                                  Utils.strFillerWithTrailingZeros(self._payload_size, 4))
         return data;
 
@@ -36,9 +36,7 @@ class Response:
                     pk_bytes);
 
     def pack_response(self):
-        if self._response_code == '2100':
-
-            print('clientId before Packing:', self._payload.getHeaderParam())
+        if self._response_code == 2100:
             data = self.pack_header();
             uid_packed = self._payload.getHeaderParam();
             data += self.packUid(uid_packed);

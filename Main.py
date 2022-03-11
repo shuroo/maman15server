@@ -7,6 +7,7 @@ from Payload import Payload
 from RequestManager import RequestManager
 from SQLInitiator import SQLInitiator
 from Constants import Constants
+from MsgPayload import MsgPayload
 
 sel = selectors.DefaultSelector()
 
@@ -19,39 +20,53 @@ def accept(sock, mask):
 
 
 def build_request(data):
-    header_param = '' # optional name or key...
-    req_code = struct.unpack("<4s", data[:4])[0].decode("utf-8");
-    version = struct.unpack("<c", data[5:6])[0].decode("utf-8");
-    message_type = struct.unpack("<c", data[5:6])[0].decode("utf-8");
+    #todo: header param should be client id..
+    client_id = '' # optional name or key...
+    req_code = struct.unpack("<H", data[:2])[0];
+    version = struct.unpack("<B", data[2:3])[0];
+    payload_size = struct.unpack("<I", data[6:10])[0];
+    if req_code != 1100 :
+        # 16byte =128bit = 128+nullTerm = 129 = len(clientId)
+        client_id = struct.unpack("<17s", data[10:27])[0].decode("utf-8");
     ## todo: should be 4 bits long
-    payload_size = struct.unpack("<I", data[7:11])[0];
     if payload_size == 0:
         payload = ""
     else:
         ## todo: try catch for the other params as well.!!!
         try:
+            start_index_payload = 27
             # todo: parse payload and pass as a string on the client side.
-            # WE CURRENTLY USE PERMENANT SIZE INSTEAD OF THE GIVEN... 256+ 161 = 417
-            payload_data = struct.unpack("<%ds" % payload_size, data[12:(12+payload_size)])[0];
+            payload_data = struct.unpack("<%ds" % payload_size, data[start_index_payload:start_index_payload+payload_size])[0];
             payload = build_payload(payload_data,req_code);
-            header_param = payload.getHeaderParam();
+            client_id = payload.getHeaderParam();
         except Exception as e:
             print("Failed to parse payload, error:",e);
             payload = "";
-    params = Request(header_param, version, req_code, payload_size, message_type, payload);
+    params = Request(client_id, version, req_code, payload_size, client_id, payload);
     return params;
 
 # buffer payload:
 # b'\x00\x08\x00\x00\x00bl\x00\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe\xfe'
 def build_payload(data,resp_code):
-    if resp_code == '1102' :
+    if resp_code == 1102 :
        # pl_sze = struct.unpack("<I", data[:4])
-        client_id = struct.unpack("<%dp"% len(data[3:49]), data[3:49])[0].decode('utf-8') # [15:62]
+       # todo: need to be 16 bits. FIX!
+        client_id = struct.unpack("<%dp"% len(data[:46]), data[:46])[0].decode('utf-8') # [15:62]
         return Payload(client_id);
+    if resp_code == 1103 :
+        print("data:",data)
+        # todo: need to be 16 bits. FIX!
+        client_id = struct.unpack("<%dp"% len(data[:17]), data[:17])[0].decode('utf-8')
+        msg_type = struct.unpack("<c", data[18:19])[0].decode('utf-8')
+        msg_content = struct.unpack("<%dp"% len(data[19:23]), data[19:23])[0].decode('utf-8')
+        pl_size = struct.unpack("<4s", data[23:27])[0].decode('utf-8')
+        content_sz = struct.unpack("<4s", data[27:31])[0].decode('utf-8')
+        return MsgPayload(client_id,msg_type, content_sz, msg_content); # client_id,msg_type, content_sz=0, msg_content=""
     else:
-        # todo: what about the first 3 bits?
-        name_or_message = struct.unpack("<%ds"% len(data[3:259]), data[3:259])[0].decode("utf-8") # 256
-        public_key = struct.unpack("<%ds"% len(data[259:420]), data[259:420])[0]  # ("<%ds"%(len(data[261:])), data[261:])[0]# 161
+        # todo: what about the first 3 bits?--it is uint32 -size!!
+        # case for request 110, and..?
+        name_or_message = struct.unpack("<%ds"% len(data[:256]), data[:256])[0].decode("utf-8") # 256
+        public_key = struct.unpack("<%ds"% len(data[256:417]), data[256:417])[0]  # ("<%ds"%(len(data[261:])), data[261:])[0]# 161
         return Payload(name_or_message, public_key);
 
 def fetch_request_params(conn):

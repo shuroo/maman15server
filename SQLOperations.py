@@ -77,27 +77,20 @@ class SQLOperations:
         TODO: how to return failure status?
     '''
 
-    def create_client_message(conn, args):
+    def create_client_message(conn, request):
+        to_client = request.getPayloadObject().getHeaderParam();
+        from_client = request.getHeaderParam();
+        msg_type = request.getMessageType();
+        # todo: decrypt the encrypted msg??
+        msg = request.getPayloadObject().getContent();
         cursor = conn.cursor();
-        # Refresh cursor to sych mysql:
-        cursor.close()
-        cursor = conn.cursor()
-        from_client = args[0][0]
-        to_client = args[0][1]
-        # TODO: What is this?z
-        c_type = 'v'
-        content = args[0][2]
-        params = (to_client, from_client, c_type, content)
+        # TODO: What is this?
+        params = (to_client, from_client, msg_type, msg)
         cursor.execute(""" insert into 
                                 Messages(ToClient,FromClient,Type,Content) 
                                   VALUES 
                                        (%s, %s, %s, %s) """, params);
-        # values("xxx","xxx","v","sdfsdf sdfsdfs sdfsf sdfsdf sdfsf");
         conn.commit();
         conn.close;
-
-    '''
-        For request 151,152,153 ... 
-    '''
 
     #params = ('002', 'CS', 'BG', 'HD1', 'T1', 'C1', 0, 'U')
