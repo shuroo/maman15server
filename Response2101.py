@@ -28,10 +28,14 @@ class Response2101(Response):
 
     # for 2101:
     def pack_response(self):
-        data = self.pack_header();
-        print("self._payload_size::",self._payload_size)
-        if (self._payload_size == 0):
-            # data = headerStruct.pack(self._response_code, self._version, self._payload_size)
+        if  self._response_code == 2101:
+            data = self.pack_header();
+            print("self._payload_size::",self._payload_size)
+            if self._payload_size == 0:
+                # data = headerStruct.pack(self._response_code, self._version, self._payload_size)
+                return data;
+            data += self.pack_clients_list();
             return data;
-        data += self.pack_clients_list();
-        return data;
+
+        elif self._response_code == 9000:
+            return self.pack_error();

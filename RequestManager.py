@@ -38,12 +38,12 @@ class RequestManager:
         reply = response.pack_response()
         return reply;
     #
-    # # For Request 140:
-    # def handle_get_client_messages_request(self,conn, *args):
-    #     print("reached handle_get_client_messages_request!!!!")
-    #     messages = SQLOperations.select_client_messages(conn,args);
-    #     return messages;
-    #
+    # For Request 140:
+    def handle_get_client_messages_request(self,conn, *args):
+        print("reached handle_get_client_messages_request!!!!")
+        messages = SQLOperations.select_client_messages(conn,args);
+        return messages;
+
     # # For Request 150:
     def handle_create_message_request(self,conn, *args):
         print("reached handle_create_message_request!!!!")
@@ -68,11 +68,11 @@ class RequestManager:
             if request_code == 1102:
                 pubKey = self.handle_public_key_request(conn,*args);
                 return pubKey;
-            # 150 - clients list: - reply should be __ when ok or 9000 - otherwise
+            # 140 - clients list: - reply should be __ when ok or 9000 - otherwise
             if request_code == 1104:
                 pubKey = self.handle_get_client_messages_request(conn,*args);
                 return pubKey;
-            # 140 - clients list: - reply should be __ when ok or 9000 - otherwise
+            # 150 - clients list: - reply should be __ when ok or 9000 - otherwise
             if request_code == 1103:
                 (client_id,msg_id) = self.handle_create_message_request(conn,request);
                 return (client_id,msg_id);

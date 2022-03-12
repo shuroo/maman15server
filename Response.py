@@ -19,28 +19,43 @@ class Response:
         return sze;
 
     def pack_header(self):
-        headerStruct = struct.Struct(f'< 4s B 4s' )  # f< H B I) # < 4s 2s 4s
-        data = headerStruct.pack(Utils.uncodeIntAsString(self._response_code),
-                                 self._version,
-                                 Utils.strFillerWithTrailingZeros(self._payload_size, 4))
+        data = struct.pack('<4sB4s', Utils.strToBytes(str(self._response_code)), self._version,
+                    Utils.strFillerWithTrailingZeros(self._payload_size, 4))
+        # headerStruct = struct.Struct(f'< 4s B 4s' )  # f< H B I) # < 4s 2s 4s
+        # data = headerStruct.pack(Utils.uncodeIntAsString(self._response_code),
+        #                          self._version,
+        #                          Utils.strFillerWithTrailingZeros(self._payload_size, 4))
         return data;
 
-    def packUid(self,uid):
+    def pack_uid(self, uid):
         uid_bytes = uid.bytes;
         return struct.pack('<16s',
                     uid_bytes);
 
-    def packPubKey(self,pubKey):
+    def pack_pub_key(self, pubKey):
         pk_bytes = Utils.strToBytes(pubKey);
         return struct.pack('<160s',
                     pk_bytes);
 
+    def pack_error(self):
+        return struct.pack('<4sB', Utils.strToBytes(self._response_code),
+                self._version);
+
     def pack_response(self):
+
         if self._response_code == 2100:
+            uid_packed = self._payload.getHeaderParam().bytes;
+
             data = self.pack_header();
-            uid_packed = self._payload.getHeaderParam();
-            data += self.packUid(uid_packed);
+            data += struct.pack('<16s',
+                               uid_packed);
             return data;
+        if self._response_code == 2102:
+            pl_size = self._payload.getPayloadSize()
+            if pl_size == 0:
+                return struct.pack('<4sIB', Utils.strToBytes(self._response_code), pl_size, self._version);
+            return struct.pack('<4sBI%ds' % pl_size, Utils.strToBytes(self._response_code), pl_size, self._version,
+                               self._payload.getContent());
 
         # todo: add error. should not reach here but to the sub class
         # elif self._response_code == '2101':
@@ -60,7 +75,6 @@ class Response:
         #     data = struct.pack('<4sIB', Utils.strToBytes(self._response_code), pl_size, self._version) + data;
         #     return data;
 
-        elif self._response_code == '9000':
-            return struct.pack('<4sB', Utils.strToBytes(self._response_code) ,
-                    self._version);
+        elif self._response_code == 9000:
+            return self.pack_error();
         raise Exception("Unknown response code:",self._response_code)

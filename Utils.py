@@ -31,7 +31,7 @@ class Utils:
        return bytes(content, 'UTF-8');
     @staticmethod
     def uncodeIntAsString(integer):
-        str_int = Utils.strToBytes(Utils.addNullTerminator(str(integer)))
+        str_int = Utils.strToBytes(str(integer))
         print('Decoded int as string:',str_int)
         return str_int;
 

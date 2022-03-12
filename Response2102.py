@@ -22,8 +22,8 @@ class Response2102(Response):
         if (self._payload_size == 0):
             # data = headerStruct.pack(self._response_code, self._version, self._payload_size)
             return data;
-        data += self.packPubKey(self._payload[0]);
+        data += self.pack_pub_key(self._payload[0]);
         print('pub key in resp 2102:', self._payload[0])
         uid_obj = UUIDProvider.strToUUID(self._payload[1][0][1]);
-        data += self.packUid(uid_obj);
+        data += self.pack_uid(uid_obj);
         return data;
