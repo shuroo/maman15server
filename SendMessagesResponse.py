@@ -1,7 +1,6 @@
-#For adding messages response,  resp_code = 1103:
-
-from UUIDProvider import UUIDProvider
-
+"""
+Class for response to req 140 - return a list of messages for the given user.
+"""
 from Response import Response
 from Message import Message
 from Constants import Constants
@@ -10,9 +9,14 @@ from Constants import Constants
 class SendMessagesResponse(Response):
 
     def calcRespSize(self):
-        sze = Constants.meta_message_size * len(self.lst_messages);
-        for message in self.lst_messages:
-            sze += len(message.content);
+        """
+        Method for calculating the response size.
+        :return: the response size.
+        """
+        lst_messages = self._payload
+        sze = Constants.meta_message_size * len(lst_messages);
+        for message in lst_messages:
+            sze += len(message);
         return sze;
 
     def __init__(self, lst_messages):
@@ -22,6 +26,10 @@ class SendMessagesResponse(Response):
 
     # for 2104:
     def pack_response(self):
+        """
+        Method for packing the response for request 140:
+        :return: a buffer of bytearray response with a list of messages.
+        """
         data = b''
         data += self.pack_header();
         lst_messages = self._payload;

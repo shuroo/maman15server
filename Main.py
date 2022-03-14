@@ -105,34 +105,10 @@ def reply(conn,mask):
 
 
 if __name__ == '__main__':
-
-    #### TBD::: unmark this to match to demo. ####
-    #
-    #
-    # exec(open("SQLInitiator.py").read())
-    # params = [b'bababa', '2', '1100']  # fetch_request_params(conn)
-    # sql_conn = SQLInitiator.cnx;
-    # req_manager = RequestManager();
-    # resp = req_manager.handle_request(sql_conn, params);
-    # # client list:
-    # params = [b'bababa', '2', '1101']
-    # resp = req_manager.handle_request(sql_conn, params);
-    # params = [b'bababa', '2', '1102']
-    # resp = req_manager.handle_request(sql_conn, params);
-    # params = [b'bababa', '2', '1103']
-    # resp = req_manager.handle_request(sql_conn, params);
-    # reply = str(resp).encode();
-    # # try:
-    # #     sqlConn = SQLInitiator.setSQLEnv();
-    # # except:
-    # #   print("Failed to init sql env of name:" , sqlConn);
-
-    #### TBD::: unmark this to match to server. ####
-
     # Read port ...
     f = open("MyPort.info", "r")
-    HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
-    PORT = f.read()        # Port to listen on (non-privileged ports are > 1023)
+    HOST = '127.0.0.1'
+    PORT = f.read()
 
     try:
         # Reset DB:

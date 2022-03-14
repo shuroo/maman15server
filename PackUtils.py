@@ -8,11 +8,6 @@ class PackUtils:
                     int_to_pack);
 
     @staticmethod
-    def pack_char(char_to_pack):
-        return struct.pack('<c',
-                    char_to_pack);
-
-    @staticmethod
     def pack_string(str_to_pack,sz=-1):
         if sz == -1:
             sz = len(str_to_pack)

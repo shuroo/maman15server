@@ -29,6 +29,7 @@ class Utils:
     @staticmethod
     def strToBytes(content):
        return bytes(content, 'UTF-8');
+
     @staticmethod
     def uncodeIntAsString(integer):
         str_int = Utils.strToBytes(str(integer))

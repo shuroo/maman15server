@@ -10,25 +10,38 @@ from SendMessagesResponse import SendMessagesResponse
 
 class RequestManager:
 
-    def handle_general_errors(self):
-        msg = "9000 Error Raised and Sent!!"
+
+    def handle_general_errors(self,err):
+        """
+        General Method for Error handling. returns status 9000.
+        """
+        msg = ("Failed to parse request. an error occured. Error:",err)
         print(msg)
         response = Response(9000, SimplePayload(msg))
         reply = response.pack_response()
         return reply;
 
-    # For Request 120:
+    # For Request 110:
     def handle_create_client_request(self,conn, request):
+        """
+        Get Clients list - Method for request 110 to create a new client.
+        """
         ident = UUIDProvider.createUniqueID()
-        SQLOperations.add_client(request.getClientNameOrId(), ident, conn, request)
-        response = Response(2100, Payload(ident))
+        response=''
+        try:
+            SQLOperations.add_client(request.getClientNameOrId(), ident, conn, request)
+            response = Response(2100, Payload(ident))
+        except:
+            msg = "Failed To Add client. Please Note that the name should be unique!"
+            print(msg)
+            response = Response(9000, Payload(msg))
         reply = response.pack_response()
         return reply;
 
+
     # For Request 120:
     def handle_clients_list_request(self,conn, request):
-        clients_list = SQLOperations.get_clients_list(conn);
-        print('clients list resp 120 first item::::',clients_list[0][0],",,",clients_list[0][1])
+        clients_list = SQLOperations.get_clients_list(conn)
         response = Response2101(clients_list)
         reply = response.pack_response()
         return reply;
@@ -44,16 +57,13 @@ class RequestManager:
 
     # For Request 140:
     def handle_get_client_messages_request(self,conn, request):
-        print("reached handle_get_client_messages_request!!!!")
         messages = SQLOperations.select_client_messages(conn,request);
         response = SendMessagesResponse(messages)
         reply = response.pack_response()
-       # messageID, ToClient, FromClient, Content
         return reply;
 
     # # For Request 150:
     def handle_create_message_request(self,conn,request):
-        print("reached handle_create_message_request!!!! payload:",request.getPayloadObject())
         (client_id,msg_id) = SQLOperations.create_client_message(conn,request);
         response = MsgReceivedResponse(client_id, msg_id)
         reply = response.pack_response()
@@ -87,5 +97,5 @@ class RequestManager:
                 return client_msg_id;
         except Exception as err:
             print('Failed to handle request. Error raised:', err);
-            return self.handle_general_errors()
+            return self.handle_general_errors(err)
         return 0
