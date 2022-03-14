@@ -27,7 +27,7 @@ def build_request(data):
     payload_size = struct.unpack("<I", data[6:10])[0];
     if req_code != 1100 :
         # 16byte =128bit = 128+nullTerm = 129 = len(clientId)
-        client_id = struct.unpack("<17s", data[10:27])[0].decode("utf-8");
+        client_id = struct.unpack("<16s", data[10:26])[0].decode("utf-8");
     ## todo: should be 4 bits long
     if payload_size == 0:
         payload = ""
@@ -42,7 +42,7 @@ def build_request(data):
         except Exception as e:
             print("Failed to parse payload, error:",e);
             payload = "";
-    params = Request(client_id, version, req_code, payload_size, client_id, payload);
+    params = Request(client_id, version, req_code, payload_size, payload);
     return params;
 
 
@@ -53,13 +53,12 @@ def build_payload(data,resp_code):
         client_id = struct.unpack("<%dp"% len(data[:46]), data[:46])[0].decode('utf-8') # [15:62]
         return Payload(client_id);
     if resp_code == 1103 :
-        print("data:",data)
+        print("data in payload:",data)
         # todo: need to be 16 bits. FIX!
-        client_id = struct.unpack("<%dp"% len(data[:17]), data[:17])[0].decode('utf-8')
+        client_id = struct.unpack("<%dp"% len(data[:16]), data[:16])[0].decode('utf-8')
         msg_type = struct.unpack("<c", data[18:19])[0].decode('utf-8')
-        msg_content = struct.unpack("<%dp"% len(data[19:23]), data[19:23])[0].decode('utf-8')
-        pl_size = struct.unpack("<4s", data[23:27])[0].decode('utf-8')
-        content_sz = struct.unpack("<4s", data[27:31])[0].decode('utf-8')
+        content_sz = struct.unpack("<I", data[19:23])[0]
+        msg_content = struct.unpack("<%ds"% len(data[23:23+content_sz]), data[23:23+content_sz])[0].decode('utf-8')
         return MsgPayload(client_id,msg_type, content_sz, msg_content); # client_id,msg_type, content_sz=0, msg_content=""
     else:
         # todo: what about the first 3 bits?--it is uint32 -size!!
@@ -84,11 +83,11 @@ def fetch_request_params(conn):
 
 
 def parse_request(conn, mask):
-     params = fetch_request_params(conn)
+     request = fetch_request_params(conn)
      sql = SQLInitiator();
      sql_conn = sql.cnx;
      req_man = RequestManager();
-     resp = req_man.handle_request(sql_conn, params);
+     resp = req_man.handle_request(sql_conn, request);
      reply = str(resp).encode()
      replydata = bytearray(reply)
      print("Replying with data:", reply)

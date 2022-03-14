@@ -6,10 +6,8 @@ CREATE TABLE IF NOT EXISTS Clients (clientID BINARY( 16 ) primary key not null,
             PublicKey  VARBINARY(161) ,
             LastSeen DATETIME
             );
-CREATE TABLE IF NOT EXISTS Messages ( ToClient BINARY( 16 ) ,
+CREATE TABLE IF NOT EXISTS Messages ( messageID BINARY(4) primary key unique not null,ToClient BINARY( 16 ) ,
             FromClient BINARY( 16 ) ,
-            Type varchar(1),
-            Content Blob,
-            FOREIGN KEY (ToClient) REFERENCES Clients(clientID),
-            FOREIGN KEY (FromClient) REFERENCES Clients(clientID)
+            Type varchar(2),
+            Content Blob
             );

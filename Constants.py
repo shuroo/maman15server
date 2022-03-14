@@ -11,4 +11,5 @@ class Constants:
     registerRespCode = 2100;
     clientsListRespCode = 2101;
     pubKRespCode = 2102;
+    msgResponseCode = 2103;
 

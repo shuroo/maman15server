@@ -15,7 +15,7 @@ class SQLOperations:
         cursor.close()
         cursor = conn.cursor()
         public_key = request.getPayloadObject().getContent();
-        print('uid:',uid)
+        print('uid given to new user is:',uid)
         params = (str(uid),user_name,public_key) # hex(replace(%s,'-',''))uuid)
         print("username request 110:",user_name)
         cursor.execute(""" INSERT INTO 
@@ -49,7 +49,6 @@ class SQLOperations:
         # todo 20/2: Need to read the public key from params!!!
         print("pub_key before select 2101:",pub_key);
         pub_key_str = '%'+pub_key[:pub_key.index('\0')-1]+'%';
-        #pub_key_uuid = UUIDProvider.bytesToUUID(pub_key).hex;
         query = """select PublicKey,hex(clientId) from clients  where hex(clientID) like %s"""#""" select PublicKey,clientId from clients  where clientID = %s; """;
         tpl_params = (pub_key_str,)
         cursor.execute(query,tpl_params)
@@ -62,10 +61,10 @@ class SQLOperations:
         For Request 140
     '''
 
-    def select_client_messages(conn,args):
+    def select_client_messages(conn,request):
         cursor = conn.cursor()
-        client_id = args[0][0]
-        cursor.execute(""" select * from Messages where ToClient = %s limit 1000; """,client_id)
+        client_id = request.getClientNameOrId()
+        cursor.execute(""" select * from Messages  limit 1000; """) #where ToClient = %s,client_id)
         result = cursor.fetchall();
         conn.close;
         return result;
@@ -78,19 +77,19 @@ class SQLOperations:
     '''
 
     def create_client_message(conn, request):
-        to_client = request.getPayloadObject().getHeaderParam();
-        from_client = request.getHeaderParam();
-        msg_type = request.getMessageType();
+        cursor = conn.cursor()
+        from_client = request.getClientNameOrId()
+        to_client = request.getPayloadObject().getHeaderParam()
+        msg_type = request.getPayloadObject().getMessageType();
         # todo: decrypt the encrypted msg??
         msg = request.getPayloadObject().getContent();
-        cursor = conn.cursor();
+        msg_id = request.getPayloadObject().getMsgId();
         # TODO: What is this?
-        params = (to_client, from_client, msg_type, msg)
+        params = (msg_id ,to_client, from_client, msg_type, msg);
         cursor.execute(""" insert into 
-                                Messages(ToClient,FromClient,Type,Content) 
+                                Messages(messageID,ToClient,FromClient,Type,Content) 
                                   VALUES 
-                                       (%s, %s, %s, %s) """, params);
+                              (unhex(replace(%s,'-','')),%s, %s, %s, %s) """, params);
         conn.commit();
         conn.close;
-
-    #params = ('002', 'CS', 'BG', 'HD1', 'T1', 'C1', 0, 'U')
+        return (to_client,msg_id)
