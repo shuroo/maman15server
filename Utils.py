@@ -17,7 +17,7 @@ class Utils:
         return f'{message:{fill}{align}{width}}'
 
     @staticmethod
-    def strFillerWithTrailingZeros(content, sze):
+    def intToStrFillerWithTrailingZeros(content, sze):
         number_str = str(content)
         zero_filled_number = number_str.rjust(sze, '0')
         return Utils.strToBytes(zero_filled_number);

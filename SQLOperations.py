@@ -23,7 +23,7 @@ class SQLOperations:
                              (clientId,userName,publicKey,LastSeen) 
                           VALUES 
                              (unhex(replace(%s,'-','')),%s, %s, NOW())""", params);
-        #  (unhex(replace('%s','-','')),'%s', '%s', NOW());
+
         conn.commit();
         conn.close;
 
@@ -63,8 +63,8 @@ class SQLOperations:
 
     def select_client_messages(conn,request):
         cursor = conn.cursor()
-        client_id = request.getClientNameOrId()
-        cursor.execute(""" select * from Messages  limit 1000; """) #where ToClient = %s,client_id)
+        client_id = '%'+request.getClientNameOrId()+'%'
+        cursor.execute(""" select messageID,ToClient,FromClient,Content from Messages where clientId like '%s' limit 1000; """)
         result = cursor.fetchall();
         conn.close;
         return result;
@@ -84,12 +84,12 @@ class SQLOperations:
         # todo: decrypt the encrypted msg??
         msg = request.getPayloadObject().getContent();
         msg_id = request.getPayloadObject().getMsgId();
-        # TODO: What is this?
-        params = (msg_id ,to_client, from_client, msg_type, msg);
+        params = (str(msg_id) ,to_client, from_client, msg_type, msg);
         cursor.execute(""" insert into 
                                 Messages(messageID,ToClient,FromClient,Type,Content) 
                                   VALUES 
-                              (unhex(replace(%s,'-','')),%s, %s, %s, %s) """, params);
+                             (%s,%s, %s, %s, %s) """, params);
+
         conn.commit();
         conn.close;
         return (to_client,msg_id)

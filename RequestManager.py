@@ -5,7 +5,8 @@ from Response2101 import Response2101
 from SimplePayload import SimplePayload
 from Payload import Payload
 from Response2102 import Response2102
-from MsgResponse import MsgResponse
+from MsgReceivedResponse import MsgReceivedResponse
+from SendMessagesResponse import SendMessagesResponse
 
 class RequestManager:
 
@@ -45,13 +46,16 @@ class RequestManager:
     def handle_get_client_messages_request(self,conn, request):
         print("reached handle_get_client_messages_request!!!!")
         messages = SQLOperations.select_client_messages(conn,request);
-        return messages;
+        response = SendMessagesResponse(messages)
+        reply = response.pack_response()
+       # messageID, ToClient, FromClient, Content
+        return reply;
 
     # # For Request 150:
     def handle_create_message_request(self,conn,request):
         print("reached handle_create_message_request!!!! payload:",request.getPayloadObject())
         (client_id,msg_id) = SQLOperations.create_client_message(conn,request);
-        response = MsgResponse(client_id,msg_id)
+        response = MsgReceivedResponse(client_id, msg_id)
         reply = response.pack_response()
         return reply;
 

@@ -20,7 +20,7 @@ def accept(sock, mask):
 
 
 def build_request(data):
-    #todo: header param should be client id..
+    #todo: put unpack in pack utils...
     client_id = '' # optional name or key...
     req_code = struct.unpack("<H", data[:2])[0];
     version = struct.unpack("<B", data[2:3])[0];

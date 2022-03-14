@@ -3,28 +3,38 @@ from Response import Response
 from Utils import Utils
 from Constants import Constants
 import struct
+from PackUtils import PackUtils
+
 # For the fetch clients list operation:
 class Response2101(Response):
-
     def calcRespSize(self):
         sze = len(self._clients_list) *(Constants.size_of_uid + Constants.size_of_name);
         return sze;
 
     def __init__(self, clients_list):
         # todo: add 2101 to constants
-        self._response_code, self._version, self._payload = Constants.clientsListRespCode, Constants.version, clients_list;
+        self._response_code, self._version, self._payload = Constants.clients_list_resp_code, Constants.version, clients_list;
         self._clients_list = clients_list ;
         self._payload_size = self.calcRespSize();
 
     def pack_clients_list(self):
         data = bytearray();
         for row in self._clients_list:
-            clientId = Utils.strToBytes(str(row[0])[:16]) #UUIDProvider.strToUUID(row[0]).bytes;
+            clientId = row[0]
             userName = Utils.strFillerWithSpaces(row[1], Constants.size_of_name)
-            print("uid:::",clientId , ",userName::" , userName )
-            data += struct.pack('<%ds' % Constants.size_of_name, Utils.strToBytes(str(userName)))
-            data += struct.pack('<%ds' % Constants.size_of_uid, clientId)
+            data += PackUtils.pack_string(userName,Constants.size_of_name)
+            data += PackUtils.pack_string(clientId,Constants.size_of_uid)
         return data;
+
+    # def pack_clients_list(self):
+    #     data = bytearray();
+    #     for row in self._clients_list:
+    #         clientIdPacked = PackUtils.pack_string(str(row[0])[:16],Constants.size_of_name) #UUIDProvider.strToUUID(row[0]).bytes;
+    #         userNamePacked = PackUtils.pack_string(Utils.strFillerWithSpaces(row[1], Constants.size_of_name), Constants.size_of_uid)
+    #
+    #         data += userNamePacked#struct.pack('<%ds' % Constants.size_of_name, Utils.strToBytes(str(userName)))
+    #         data += clientIdPacked #struct.pack('<%ds' % Constants.size_of_uid, clientId)
+    #     return data;
 
     # for 2101:
     def pack_response(self):

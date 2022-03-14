@@ -5,6 +5,7 @@ from Utils import Utils
 from Constants import Constants
 import struct
 # For the fetch clients list operation:
+
 class Response2102(Response):
 
     def calcRespSize(self):
@@ -12,7 +13,7 @@ class Response2102(Response):
         return sze;
 
     def __init__(self, pubKey,clientId):
-        self._response_code, self._version, self._payload = Constants.pubKRespCode, Constants.version, (pubKey,clientId);
+        self._response_code, self._version, self._payload = Constants.pub_k_resp_code, Constants.version, (pubKey, clientId);
         self._payload_size = self.calcRespSize();
 
     # for 2102:
