@@ -1,15 +1,14 @@
-from UUIDProvider import UUIDProvider;
-
+"""
+Class to manage SQL access (data access layer, DAL)
+"""
 class SQLOperations:
 
-#### TODO : FINISH THIS!! ####
 
-    '''
-        For request 110: add a new client (if not exists)
-    '''
     @staticmethod
     def add_client(user_name,uid,conn,request):
-
+        '''
+            For request 110: add a new client (if not exists)
+        '''
         cursor = conn.cursor();
         # Refresh cursor to sych mysql:
         cursor.close()
@@ -25,23 +24,23 @@ class SQLOperations:
         conn.commit();
         conn.close;
 
-    '''
-        For request 120: provide a list of clients 
-    '''
+
     @staticmethod
     def get_clients_list(conn):
+        '''
+            For request 120: provide a list of clients
+        '''
         cursor = conn.cursor()
         cursor.execute("""select hex(clientId) clientId, userName 
-        from Clients limit 1000 """); # LPAD(, 16, '\0') , CAST(clientId as CHAR(16))
-        # select hex(clientId),publicKey from clients  where hex(clientId) = 'AC30F66482304F4C8ECB290C85E2BFE9';
+        from Clients limit 1000 """);
         result = cursor.fetchall()
         conn.close;
         return result;
 
-    '''
-        For request 130: get public key by client 
-    '''
     def select_public_key(conn,pub_key):
+        '''
+             For request 130: get public key.
+        '''
         cursor = conn.cursor()
         # todo 20/2: Need to read the public key from params!!!
         pub_key_str = '%'+pub_key[:pub_key.index('\0')-1]+'%';
@@ -53,35 +52,28 @@ class SQLOperations:
         return result;
 
 
-    '''
-        For Request 140
-    '''
-
     def select_client_messages(conn,request):
+        '''
+            For Request 140 - fetch messages for the specific user
+        '''
         cursor = conn.cursor()
         client_id = request.getClientNameOrId()
         client_id_str = '%' + client_id + '%';
-        query =""" select messageID,ToClient,FromClient,Type , Content from Messages """ #  where
-       # ToClient like %s limit 1000;
-       # tpl_params = (client_id_str,)
-        cursor.execute(query)
+        query =""" select messageID,ToClient,FromClient,Type , Content from Messages  where ToClient like %s limit 1000 """
+        tpl_params = (client_id_str,)
+        cursor.execute(query,tpl_params)
         result = cursor.fetchall();
         conn.close;
         return result;
 
-
-
-    '''
-        For request 150: add a new message
-        TODO: how to return failure status?
-    '''
-
     def create_client_message(conn, request):
+        '''
+            For request 150: add a new message to the message table
+        '''
         cursor = conn.cursor()
         from_client = request.getClientNameOrId()
         to_client = request.getPayloadObject().getHeaderParam()
         msg_type = request.getPayloadObject().getMessageType();
-        # todo: decrypt the encrypted msg??
         msg = request.getPayloadObject().getContent();
         msg_id = request.getPayloadObject().getMsgId();
         params = (str(msg_id) ,to_client, from_client, msg_type, msg);

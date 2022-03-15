@@ -1,3 +1,10 @@
+"""
+
+Class for managing the different client requests , 110 - 152:
+
+"""
+
+
 from UUIDProvider import UUIDProvider
 from SQLOperations import SQLOperations
 from Response import Response
@@ -24,7 +31,7 @@ class RequestManager:
     # For Request 110:
     def handle_create_client_request(self,conn, request):
         """
-        Get Clients list - Method for request 110 to create a new client.
+        Register User - Method for request 110 to create a new client.
         """
         ident = UUIDProvider.createUniqueID()
         response=''
@@ -41,6 +48,9 @@ class RequestManager:
 
     # For Request 120:
     def handle_clients_list_request(self,conn, request):
+        """
+        Get Clients list - Method for request 120 to get the clients list.
+        """
         clients_list = SQLOperations.get_clients_list(conn)
         response = Response2101(clients_list)
         reply = response.pack_response()
@@ -49,6 +59,9 @@ class RequestManager:
     # For Request 130:
 
     def handle_public_key_request(self,conn, req):
+        """
+        Generate public key - Method for request 130 to save a public key.
+        """
         client_id = req.getPayloadObject().getHeaderParam()
         pub_key = SQLOperations.select_public_key(conn,client_id);
         response = Response2102(client_id,pub_key)
@@ -57,6 +70,9 @@ class RequestManager:
 
     # For Request 140:
     def handle_get_client_messages_request(self,conn, request):
+        """
+        Get Client Messages - Method for request 140 to fetch user messages.
+        """
         messages = SQLOperations.select_client_messages(conn,request);
         response = SendMessagesResponse(messages)
         reply = response.pack_response()
@@ -72,6 +88,9 @@ class RequestManager:
     # TBD: Requests: 150,151,152,153,0
 
     def handle_request(self, conn, *args):
+        """
+        Gateway Method for processing each request by its request code.
+        """
         try:
             request = args[0];
             request_code = request.getRequestCode();

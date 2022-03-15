@@ -1,11 +1,12 @@
-# Message class \ struct
-from Utils import Utils
+#
+"""
+Message class for processing message fetched in request 140, (get client messages).
+"""
 from PackUtils import PackUtils
 
 class Message:
 
     def __init__(self,msg_row):
-        print(msg_row)
         self.msg_id = msg_row[0]
         self.to_client = msg_row[1]
         self.from_client = msg_row[2]
@@ -14,6 +15,10 @@ class Message:
         self.msg_size = len(self.content)
 
     def pack_message_sent(self):
+        """
+        Pack the message to send it back to the client via buffer
+        :return: string - buffer with message content (bytes).
+        """
         data = b''
         if len(self.content) == 0:
             return data;
